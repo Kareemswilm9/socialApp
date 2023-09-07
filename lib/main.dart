@@ -46,7 +46,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
 
     return BlocProvider(
-      create: (BuildContext context) =>SocialCubit()..getUserData(),
+      create: (BuildContext context) =>SocialCubit()..getUserData()..getPostModel(),
       child: MaterialApp(
         theme: lightTheme,
           debugShowCheckedModeBanner: false,

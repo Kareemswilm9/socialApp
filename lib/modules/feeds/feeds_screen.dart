@@ -1,52 +1,73 @@
+import 'package:conditional_builder_null_safety/conditional_builder_null_safety.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:socail_applcation/layout/cubit/cubit.dart';
+import 'package:socail_applcation/layout/cubit/states.dart';
+import 'package:socail_applcation/models/postmodel.dart';
 import 'package:socail_applcation/shared/components/widgets/components.dart';
 import 'package:socail_applcation/shared/styles/icon_broken.dart';
 
 class Feeds_Screen extends StatelessWidget {
-  const Feeds_Screen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      physics: BouncingScrollPhysics(),
-      child: Column(
-        children: [
-          Card(
-            clipBehavior: Clip.antiAliasWithSaveLayer,
-            elevation: 5,
-            margin: EdgeInsets.all(8),
-            child: Stack(
-              alignment: AlignmentDirectional.bottomEnd,
+    return BlocConsumer<SocialCubit,SocialStates>(
+      listener: (BuildContext context, state) {},
+      builder: (BuildContext context, SocialStates? state) {
+        return ConditionalBuilder(
+          condition: SocialCubit.get(context).posts.isNotEmpty &&
+              SocialCubit.get(context).userModel != null,
+          builder: (BuildContext context) => SingleChildScrollView(
+            physics: BouncingScrollPhysics(),
+            child: Column(
               children: [
-                Image(
-                  image: NetworkImage(
-                      'https://imagedelivery.net/WS9ABFRS6TfdqDudkFOT3w/grrraphic/previews/3n0drd9pvuoNiRD6GKeD8s1bsv2SQT5jnAc3If0D.jpeg/public'),
-                  fit: BoxFit.cover,
-                  height: 200,
-                  width: double.infinity,
+                Card(
+                  clipBehavior: Clip.antiAliasWithSaveLayer,
+                  elevation: 5,
+                  margin: EdgeInsets.all(8),
+                  child: Stack(
+                    alignment: AlignmentDirectional.bottomEnd,
+                    children: [
+                      Image(
+                        image: NetworkImage(
+                          'https://image.freepik.com/free-photo/horizontal-shot-smiling-curly-haired-woman-indicates-free-space-demonstrates-place-your-advertisement-attracts-attention-sale-wears-green-turtleneck-isolated-vibrant-pink-wall_273609-42770.jpg',
+                        ),
+                        fit: BoxFit.cover,
+                        height: 200.0,
+                        width: double.infinity,
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text('Communicate with  friends',
+                            style:
+                                TextStyle(fontSize: 15, color: Colors.white)),
+                      ),
+                    ],
+                  ),
                 ),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Text('Communicate with  friends',
-                      style: TextStyle(fontSize: 15, color: Colors.white)),
-                ),
+                ListView.separated(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+
+                  itemBuilder: (context, index) => buildPostItem(
+                       SocialCubit.get(context).posts[index],context, index),
+                  itemCount: SocialCubit.get(context).posts.length,
+                  separatorBuilder: ( context,  index) =>
+                      SizedBox(
+                    height: 8,
+                  ),
+                )
               ],
             ),
           ),
-          ListView.separated(
-            shrinkWrap: true,
-            itemBuilder: (context, index) => buildPostItem(context),
-            itemCount: 10,
-            separatorBuilder: (BuildContext context, int index) => SizedBox(
-              height: 8,
-            ),
-          )
-        ],
-      ),
+          fallback: (BuildContext context) =>
+              Center(child: CircularProgressIndicator()),
+        );
+      },
     );
   }
 
-  Widget buildPostItem(context) => Card(
+  Widget buildPostItem(PostModel model, context,index) => Card(
       clipBehavior: Clip.antiAliasWithSaveLayer,
       elevation: 5,
       margin: EdgeInsets.symmetric(horizontal: 8),
@@ -55,11 +76,10 @@ class Feeds_Screen extends StatelessWidget {
         child: Column(
           children: [
             Row(
-              children: [
+                children: [
                 CircleAvatar(
                   radius: 25,
-                  backgroundImage: NetworkImage(
-                      'https://imagedelivery.net/WS9ABFRS6TfdqDudkFOT3w/grrraphic/previews/Qd7vc1PqLhldbHjcTku63QJDklP3WzeAJldG0IvT.jpeg/public'),
+                  backgroundImage: NetworkImage('${model.image}'),
                 ),
                 SizedBox(
                   width: 15,
@@ -73,14 +93,14 @@ class Feeds_Screen extends StatelessWidget {
                         Row(
                           children: [
                             Text(
-                              'Kareem swilm',
+                              '${model.name}',
                               style: TextStyle(
                                   fontSize: 18,
                                   fontWeight: FontWeight.bold,
-                                  height: 1.3),
+                                  height: 1.4),
                             ),
                             SizedBox(
-                              width: 5,
+                              width: 15,
                             ),
                             Icon(
                               Icons.check_circle,
@@ -90,7 +110,7 @@ class Feeds_Screen extends StatelessWidget {
                           ],
                         ),
                         Text(
-                          '18/1/2002',
+                          '${model.dateTime}',
                           style: TextStyle(
                               fontSize: 15, color: Colors.grey, height: 1.3),
                         ),
@@ -110,66 +130,83 @@ class Feeds_Screen extends StatelessWidget {
               ],
             ),
             Padding(
-              padding: const EdgeInsets.symmetric(vertical: 15.0),
-              child: myDivider(),
+              padding: const EdgeInsets.symmetric(
+                vertical: 15.0,
+              ),
+              child: Container(
+                width: double.infinity,
+                height: 1.0,
+                color: Colors.grey[300],
+              ),
             ),
             Text(
-              "Lorem Ipsum is simply dummy text of the printing and typesetting inmbled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.",
+              '${model.text}',
               style: TextStyle(
                   height: 1, fontWeight: FontWeight.bold, fontSize: 14),
             ),
-            Container(
-              width: double.infinity,
-              child: Wrap(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(
-                      bottom: 5,
-                      top: 5,
+            // Container(
+            //   width: double.infinity,
+            //   child: Wrap(
+            //     children: [
+            //       // Padding(
+            //       //   padding: const EdgeInsets.only(
+            //       //     bottom: 5,
+            //       //     top: 5,
+            //       //   ),
+            //       //   child: Container(
+            //       //     height: 20,
+            //       //     child: MaterialButton(
+            //       //         onPressed: () {},
+            //       //         minWidth: 1,
+            //       //         height: 25,
+            //       //         padding: EdgeInsets.zero,
+            //       //         child: Text(
+            //       //           '#Software',
+            //       //           style: TextStyle(color: Colors.blue),
+            //       //         )),
+            //       //   ),
+            //       // ),
+            //       // Padding(
+            //       //   padding: const EdgeInsets.only(
+            //       //     bottom: 5,
+            //       //     top: 5,
+            //       //   ),
+            //       //   child: Container(
+            //       //     height: 20,
+            //       //     child: MaterialButton(
+            //       //         onPressed: () {},
+            //       //         minWidth: 1,
+            //       //         height: 25,
+            //       //         padding: EdgeInsets.zero,
+            //       //         child: Text(
+            //       //           '#Software',
+            //       //           style: TextStyle(color: Colors.blue),
+            //       //         )),
+            //       //   ),
+            //       // ),
+            //     ],
+            //   ),
+            // ),
+
+            if (model.postImage != '')
+              Padding(
+                padding: const EdgeInsets.only(top: 10.0),
+                child: Container(
+                  height: 200.0,
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(
+                      4.0,
                     ),
-                    child: Container(
-                      height: 20,
-                      child: MaterialButton(
-                          onPressed: () {},
-                          minWidth: 1,
-                          height: 25,
-                          padding: EdgeInsets.zero,
-                          child: Text(
-                            '#Software',
-                            style: TextStyle(color: Colors.blue),
-                          )),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(
-                      bottom: 5,
-                      top: 5,
-                    ),
-                    child: Container(
-                      height: 20,
-                      child: MaterialButton(
-                          onPressed: () {},
-                          minWidth: 1,
-                          height: 25,
-                          padding: EdgeInsets.zero,
-                          child: Text(
-                            '#Software',
-                            style: TextStyle(color: Colors.blue),
-                          )),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Container(
-                height: 200,
-                width: double.infinity,
-                decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(5),
                     image: DecorationImage(
-                        image: NetworkImage(
-                            'https://imagedelivery.net/WS9ABFRS6TfdqDudkFOT3w/grrraphic/previews/Qd7vc1PqLhldbHjcTku63QJDklP3WzeAJldG0IvT.jpeg/public'),
-                        fit: BoxFit.cover))),
+                      image: NetworkImage(
+                        '${model.postImage}',
+                      ),
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                ),
+              ),
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 8.0),
               child: Row(
@@ -189,7 +226,7 @@ class Feeds_Screen extends StatelessWidget {
                               width: 5,
                             ),
                             Text(
-                              '120',
+                              '${SocialCubit.get(context).likes[index]}',
                               style:
                                   TextStyle(color: Colors.grey, fontSize: 14),
                             )
@@ -215,7 +252,7 @@ class Feeds_Screen extends StatelessWidget {
                               width: 5,
                             ),
                             Text(
-                              '120 Comment',
+                              '0 Comment',
                               style:
                                   TextStyle(color: Colors.grey, fontSize: 14),
                             )
@@ -241,7 +278,7 @@ class Feeds_Screen extends StatelessWidget {
                         CircleAvatar(
                           radius: 20,
                           backgroundImage: NetworkImage(
-                              'https://imagedelivery.net/WS9ABFRS6TfdqDudkFOT3w/grrraphic/previews/Qd7vc1PqLhldbHjcTku63QJDklP3WzeAJldG0IvT.jpeg/public'),
+                            '${SocialCubit.get(context).userModel?.image}'),
                         ),
                         SizedBox(
                           width: 15,
@@ -275,7 +312,9 @@ class Feeds_Screen extends StatelessWidget {
                       )
                     ],
                   ),
-                  onTap: () {},
+                  onTap: () {
+                    SocialCubit.get(context).likePost(SocialCubit.get(context).postId[index]);
+                  },
                 ),
               ],
             )
